@@ -19,6 +19,10 @@ echo "=== nginx 설치 ==="
 apt update
 apt install -y nginx
 
+echo "=== 방화벽 포트 오픈 ==="
+iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+
 echo "=== 임시 nginx.conf 적용 (80포트만) ==="
 cp nginx.temp.conf /etc/nginx/nginx.conf
 sed -i "s/\$DOMAIN/$DOMAIN/g" /etc/nginx/nginx.conf
