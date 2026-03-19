@@ -19,18 +19,23 @@ echo "=== nginx 설치 ==="
 apt update
 apt install -y nginx
 
-echo "=== nginx.conf 복사 및 도메인 설정 ==="
-cp nginx.conf /etc/nginx/nginx.conf
+echo "=== 임시 nginx.conf 적용 (80포트만) ==="
+cp nginx.temp.conf /etc/nginx/nginx.conf
 sed -i "s/\$DOMAIN/$DOMAIN/g" /etc/nginx/nginx.conf
-
-echo "=== certbot 설치 ==="
-apt install -y certbot python3-certbot-nginx
 
 echo "=== nginx 시작 ==="
 systemctl start nginx
 systemctl enable nginx
 
+echo "=== certbot 설치 ==="
+apt install -y certbot python3-certbot-nginx
+
 echo "=== Let's Encrypt 인증서 발급 ==="
 certbot --nginx -d $DOMAIN
+
+echo "=== 최종 nginx.conf 적용 ==="
+cp nginx.conf /etc/nginx/nginx.conf
+sed -i "s/\$DOMAIN/$DOMAIN/g" /etc/nginx/nginx.conf
+systemctl reload nginx
 
 echo "=== 완료! ==="
