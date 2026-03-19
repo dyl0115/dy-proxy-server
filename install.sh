@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e # 에러 발생 시 즉시 중단
+
+if [ "$EUID" -ne 0 ]; then
+    echo "root 권한이 필요해요. sudo로 실행해주세요!"
+    exit 1
+fi
+
+DOMAIN=${1:-""}
+
+if [ -z "$DOMAIN" ]; then
+    echo "사용법: ./install.sh [도메인]"
+    echo "예시: ./install.sh your.domain.com"
+    exit 1
+fi
+
+echo "=== nginx 설치 ==="
+apt update
+apt install -y nginx
+
+echo "=== nginx.conf 복사 및 도메인 설정 ==="
+cp nginx.conf /etc/nginx/nginx.conf
+sed -i "s/\$DOMAIN/$DOMAIN/g" /etc/nginx/nginx.conf
+
+echo "=== certbot 설치 ==="
+apt install -y certbot python3-certbot-nginx
+
+echo "=== nginx 시작 ==="
+systemctl start nginx
+systemctl enable nginx
+
+echo "=== Let's Encrypt 인증서 발급 ==="
+certbot --nginx -d $DOMAIN
+
+echo "=== 완료! ==="
